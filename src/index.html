@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.2/dist/tf.min.js"></script>
   </head>
   <body>
     <div id="dvTable">Loading...</div> 
@@ -36,13 +36,13 @@
                 xhr.send();
             });
         }             
-
+        SEED=10946
         async function trainModel(trainData, labelData) {
             const model = tf.sequential({
                 layers: [
                 tf.layers.batchNormalization({inputShape:[199]}),
                 tf.layers.dense({units: 128, inputShape:[199],useBias:true,activation: 'relu'}),
-                tf.layers.dropout({rate:0.25}),
+                tf.layers.dropout({rate:0.25,seed:SEED}),
                 tf.layers.dense({units: 8, activation: 'sigmoid'}),
                 ]
             });
