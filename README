@@ -1,0 +1,20 @@
+This repo was created to help diagnose an issue.
+
+Tensorflow python (tftest.ipynb) was used to create a simple ML model.
+
+The results are good and I wish to replicate those in tfjs.
+
+When I export the Python model and import into tfjs, the results are the same.
+
+However when I create a brand new tfjs model and train it on the exact same data, the results are completely different.
+
+Example python and js code is included here in this repo, along with a single set of training, label, and input data files used to make predictions.
+
+Using a single set of files across both python and JS eliminates the possibility that the training data is somehow different.
+
+My expectation is that when creating a brand new tf model with the same topology as the python model, 
+and train it on the same data, that the results would be very close.
+
+Thanks for reading this and providing any suggestions!
+
+-Blair
