@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TF Test</title>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+  </head>
+  <body>
+    <div id="dvTable">Loading...</div> 
+    <script>
+        window.onload = loadAndTrain;
+        function loadJSON(method, url) {
+            return new Promise(function (resolve, reject) {
+                let xhr = new XMLHttpRequest();
+                xhr.open(method, url);
+                xhr.onload = function () {
+                    if (this.status >= 200 && this.status < 300) {
+                        resolve(xhr.response);
+                    } else {
+                        reject({
+                            status: this.status,
+                            statusText: xhr.statusText
+                        });
+                    }
+                };
+                xhr.onerror = function () {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                };
+                xhr.send();
+            });
+        }             
+
+        async function trainModel(trainData, labelData) {
+            const model = tf.sequential({
+                layers: [
+                tf.layers.batchNormalization({inputShape:[199]}),
+                tf.layers.dense({units: 128, inputShape:[199],useBias:true,activation: 'relu'}),
+                tf.layers.dropout({rate:0.25}),
+                tf.layers.dense({units: 8, activation: 'sigmoid'}),
+                ]
+            });
+
+            model.compile({
+                optimizer:'adam',
+                loss:'binaryCrossentropy',
+                metrics:['accuracy']
+            });
+            trainTensor = tf.tensor(trainData, [trainData.length,199]);
+            labelTensor = tf.tensor(labelData, [labelData.length,8]);
+            console.log('Training...');
+            model.fit(trainTensor, labelTensor, {
+                batchSize : 20,
+                epochs : 5,
+                validationSplit: 0.25
+            });
+
+            return model;            
+        }
+
+        async function loadAndTrain() {
+            console.log('Running loadAndTrain');
+            var trainingData = null;
+            var data = null;
+            data = await loadJSON('GET', 'trainingData.json');
+            trainingData = JSON.parse(data);
+
+            var labelData = null;
+            data = await loadJSON('GET', 'labelData.json');
+            labelData = JSON.parse(data);
+
+            model = await trainModel(trainingData.data, labelData.data);
+
+            console.log('Training complete');
+            var inputData = null;
+            data = await loadJSON('GET', 'inputData.json');
+            inputData = JSON.parse(data);     
+
+            inputTensor = tf.tensor(inputData.data, [inputData.data.length,199]);            
+            const predictionsTensor = model.predict(inputTensor, {batchSize: 20});
+            const predictionsArray = predictionsTensor.arraySync();
+
+            generateTable(predictionsArray);
+            var lineArray = [];
+            predictionsArray.forEach(function (infoArray, index) {
+                var line = infoArray.join(",");
+                lineArray.push(index == 0 ? "data:text/csv;charset=utf-8," + line : line);
+            });
+            var csvContent = lineArray.join("\n");
+        }
+
+        function generateTable(predictionsArray) {
+     
+            //Create a HTML Table element.
+            var table = document.createElement("TABLE");
+            table.border = "1";
+     
+            //Get the count of columns.
+            var columnCount = predictionsArray[0].length;
+     
+            //Add the header row.
+            var row = table.insertRow(-1);
+            for (var i = 0; i < columnCount; i++) {
+                var headerCell = document.createElement("TH");
+                headerCell.innerHTML = i.toString();
+                row.appendChild(headerCell);
+            }
+     
+            //Add the data rows.
+            for (var i = 1; i < predictionsArray.length; i++) {
+                row = table.insertRow(-1);
+                for (var j = 0; j < columnCount; j++) {
+                    var cell = row.insertCell(-1);
+                    cell.innerHTML = predictionsArray[i][j].toString();
+                }
+            }
+     
+            var dvTable = document.getElementById("dvTable");
+            dvTable.innerHTML = "";
+            dvTable.appendChild(table);
+        }        
+
+    </script>
+
+  </body>
+
+</html>

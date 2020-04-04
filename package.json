@@ -1,0 +1,27 @@
+{
+  "name": "tftest",
+  "version": "1.0.0",
+  "description": "Planet Timing App",
+  "main": "app.js",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.16.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "prod": "rm -rf dist; mkdir dist; mkdir dist/public; cp src/index.html dist; cp src/server.js dist; cp src/public/* dist/public; cd dist; node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blairwheadon/timr.git"
+  },
+  "engines": {
+    "node": "8.x.x"
+  },
+  "author": "Blair Wheadon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/blairwheadon/timr/issues"
+  },
+  "homepage": "https://github.com/blairwheadon/timr#readme"
+}
